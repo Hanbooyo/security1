@@ -2,49 +2,36 @@ package com.cos.security1.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authorization.AuthorizationDecision;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Configuration // IoC 빈(bean)을 등록
-@EnableWebSecurity // 필터 체인 관리 시작 어노테이션
-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true) // 특정 주소 접근시 권한 및 인증을 위한 어노테이션 활성화
+@Configuration
+@EnableWebSecurity // 스프링 시큐리티 필터가 스프링 필터체인에 등록
 public class SecurityConfig {
 
+    //해당 메서드의 리턴되는 오브젝트를 IoC로 등록해줌 (Bean 어노테이션)
     @Bean
-    public BCryptPasswordEncoder encodePwd() {
+    public BCryptPasswordEncoder encodePwd(){
         return new BCryptPasswordEncoder();
     }
 
-    // SecurityFilterChain 빈을 정의하여 보안 설정을 관리
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())  // CSRF 비활성화
-                .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/user/**").authenticated() // 경로 매칭에 사용
-                        .requestMatchers("/admin/**").hasRole("ROLE_ADMIN")
-                        // 두 권한을 모두 확인하는 람다식 사용
-                        .requestMatchers("/manager/**").access((authentication, object) -> {
-                            boolean hasAdminRole = authentication.get().getAuthorities().stream()
-                                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
-
-                            boolean hasManagerRole = authentication.get().getAuthorities().stream()
-                                    .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_MANAGER"));
-
-                            return new AuthorizationDecision(hasAdminRole && hasManagerRole);
-                        })
-                        .anyRequest().permitAll()
-                )
-                .formLogin((form) -> form
-                        .loginPage("/login")
-                        .loginProcessingUrl("/loginProc")
-                        .defaultSuccessUrl("/")
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/user/**").authenticated() // /user라는 url로 들어오면 인증이 필요하다.
+                        .requestMatchers("/manager/**").hasAnyRole("MANAGER", "ADMIN") // manager으로 들어오는 MANAGER 인증 또는 ADMIN인증이 필요하다는 뜻이다.
+                        .requestMatchers("/admin/**").hasRole("ADMIN") // //admin으로 들어오면 ADMIN권한이 있는 사람만 들어올 수 있음
+                        .anyRequest().permitAll() // 그리고 나머지 url은 전부 권한을 허용해준다.
                 );
 
+        http.formLogin(form -> form
+                .loginPage("/loginForm"));
         return http.build();
     }
+
+
 }
