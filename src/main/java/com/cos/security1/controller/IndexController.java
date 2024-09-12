@@ -5,6 +5,7 @@ import com.cos.security1.model.User;
 import com.cos.security1.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -85,9 +86,16 @@ public class IndexController {
     public String joinForm() {
         return "joinForm";
     }
-    
+
+    @Secured("ADMIN")
     @GetMapping("/info")
     public @ResponseBody String info() {
         return "개인정보";
+    }
+
+    @PreAuthorize("hasAnyRole('MANAGER,ADMIN')")
+    @GetMapping("/data")
+    public @ResponseBody String data() {
+        return "데이터정보";
     }
 }
