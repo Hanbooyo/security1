@@ -1,5 +1,7 @@
 package com.cos.security1.config;
 
+import com.cos.security1.config.oauth.PrincipalOauth2UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -13,6 +15,9 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity // 스프링 시큐리티 필터가 스프링 필터체인에 등록
 @EnableGlobalMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
+
+    @Autowired
+    private PrincipalOauth2UserService principalOauth2UserService;
 
     //해당 메서드의 리턴되는 오브젝트를 IoC로 등록해줌 (Bean 어노테이션)
     @Bean
@@ -58,7 +63,11 @@ public class SecurityConfig {
 
                 .oauth2Login(oauth2Login ->
                         oauth2Login
-                                .loginPage("/loginForm") // OAuth2 로그인 페이지 설정
+                                .loginPage("/loginForm") // 커스텀 로그인 페이지 설정
+                                .userInfoEndpoint(userInfoEndpoint ->
+                                        userInfoEndpoint
+                                                .userService(principalOauth2UserService) // OAuth2 사용자 정보를 처리할 서비스 설정
+                                )
                 );
 
         return http.build();
