@@ -1,6 +1,7 @@
 package com.cos.security1.config.auth;
 
 import com.cos.security1.model.User;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -17,6 +18,7 @@ import java.util.List;
 //User오브젝트 타입 => UserDetails 타입 객체
 
 //Security Session => Authentication 객체 => UserDetails(PrincipalDetails)
+@Data
 public class PrincipalDetails implements UserDetails {
     private User user; // 콤포지션
 

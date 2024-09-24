@@ -8,11 +8,19 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
+    
+    // 구글로 부터 받은 userRequest 데이터에 대한 후처리 함수
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         System.out.println("userRequest : " + userRequest.getClientRegistration().getRegistrationId());
         System.out.println("userToken : " + userRequest.getAccessToken().getTokenValue());
+        // 구글 로그인 버튼 클릭 → 구글 로그인 창 → 로그인을 완료 → code를 리턴(OAuth-Client라이브러리) → AccessToken요청
+        // userRequest 정보 → 회원 프로필 받음(loadUser함수) 호출 → 구글로부터 회원 프로필을 받아줌
         System.out.println("getAttribute " + super.loadUser(userRequest).getAttributes());
+
+        OAuth2User oAuth2User = super.loadUser(userRequest);
+
+        //회원가입 진행
         return super.loadUser(userRequest);
     }
 }
