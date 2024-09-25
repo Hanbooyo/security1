@@ -68,6 +68,8 @@ public class IndexController {
             System.out.println(auth.getAuthority());
         }
 
+        System.out.println("princibpalDetails : " + principal.getUser());
+
         return "유저 페이지입니다.";
     }
 
