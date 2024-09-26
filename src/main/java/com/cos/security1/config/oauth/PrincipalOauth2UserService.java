@@ -34,7 +34,15 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         // userRequest 정보 → 회원 프로필 받음(loadUser함수) 호출 → 구글로부터 회원 프로필을 받아줌
         System.out.println("getAttribute " + oAuth2User.getAttributes());
 
-        String provider = userRequest.getClientRegistration().getClientId(); //
+        if(userRequest.getClientRegistration().getRegistrationId().equals("Google")){
+            
+        }else if(userRequest.getClientRegistration().getRegistrationId().equals("Facebook")){
+            
+        }else {
+            System.out.println("미지원 로그인");
+        }
+
+        String provider = userRequest.getClientRegistration().getRegistrationId(); //
         String providerId = (String) oAuth2User.getAttributes().get("sub");
         String username = provider+"_"+providerId; // google_
         String password = bCryptPasswordEncoder.encode("겟인데어");
@@ -60,6 +68,7 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
             return new PrincipalDetails(userEntity, oAuth2User.getAttributes());
         }
         //회원가입 진행
+
         return super.loadUser(userRequest);
     }
 }
