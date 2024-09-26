@@ -35,14 +35,17 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         System.out.println("getAttribute " + oAuth2User.getAttributes());
 
         String provider = userRequest.getClientRegistration().getClientId(); //
-        String providerId = oAuth2User.getAttributes().toString();
+        String providerId = (String) oAuth2User.getAttributes().get("sub");
         String username = provider+"_"+providerId; // google_
         String password = bCryptPasswordEncoder.encode("겟인데어");
         String email = oAuth2User.getAttribute("email");
         String role = "ROLE_USER";
 
+        System.out.println("==================username : " + username);
+
         User userEntity = userRepository.findByUsername(username);
         if (userEntity == null) {
+            System.out.println("구글 로그인이 최초 입니다.");
             userEntity = User.builder()
                     .username(username)
                     .password(password)
@@ -53,6 +56,7 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
                     .build();
             userRepository.save(userEntity);
         }else {
+            System.out.println("구글 로그인을 기록있음. 자동 회원 가입.");
             return new PrincipalDetails(userEntity, oAuth2User.getAttributes());
         }
         //회원가입 진행

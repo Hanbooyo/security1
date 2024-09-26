@@ -40,7 +40,7 @@ public class IndexController {
     }
 
     @GetMapping("/test/oauth/login")
-    public @ResponseBody String testOAuthLogin(
+    public @ResponseBody String testOAuthLogin( 
             Authentication authentication,
             @AuthenticationPrincipal PrincipalDetails userDetails) { // DI 의존성 주입
         System.out.println("/test/login ===========================");
