@@ -1,6 +1,10 @@
 package com.cos.security1.config.oauth;
 
 import com.cos.security1.config.auth.PrincipalDetails;
+import com.cos.security1.config.oauth.provider.FacebookUserInfo;
+import com.cos.security1.config.oauth.provider.GoogleUserInfo;
+import com.cos.security1.config.oauth.provider.NaverUserInfo;
+import com.cos.security1.config.oauth.provider.OAuth2Userinfo;
 import com.cos.security1.model.User;
 import com.cos.security1.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +14,8 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
@@ -33,20 +39,31 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         // 구글 로그인 버튼 클릭 → 구글 로그인 창 → 로그인을 완료 → code를 리턴(OAuth-Client라이브러리) → AccessToken요청
         // userRequest 정보 → 회원 프로필 받음(loadUser함수) 호출 → 구글로부터 회원 프로필을 받아줌
         System.out.println("getAttribute " + oAuth2User.getAttributes());
-
+        OAuth2Userinfo oAuth2UserInfo = null;
         if(userRequest.getClientRegistration().getRegistrationId().equals("Google")){
-            
+            System.out.println("구글 로그인 요청");
+            oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
         }else if(userRequest.getClientRegistration().getRegistrationId().equals("Facebook")){
-            
-        }else {
+            oAuth2UserInfo = new FacebookUserInfo(oAuth2User.getAttributes());
+        }else if(userRequest.getClientRegistration().getRegistrationId().equals("Naver")){
+            oAuth2UserInfo = new NaverUserInfo((Map) oAuth2User.getAttributes().get("reponse"));
+        }
+        else {
             System.out.println("미지원 로그인");
         }
 
-        String provider = userRequest.getClientRegistration().getRegistrationId(); //
-        String providerId = (String) oAuth2User.getAttributes().get("sub");
-        String username = provider+"_"+providerId; // google_
+//        String provider = userRequest.getClientRegistration().getRegistrationId(); //
+//        String providerId = (String) oAuth2User.getAttributes().get("sub");
+//        String username = provider+"_"+providerId; // google_
+//        String password = bCryptPasswordEncoder.encode("겟인데어");
+//        String email = oAuth2User.getAttribute("email");
+//        String role = "ROLE_USER";
+
+        String provider = oAuth2UserInfo.getProvider();
+        String providerId = oAuth2UserInfo.getProviderId();
+        String username = provider+"_"+providerId;
         String password = bCryptPasswordEncoder.encode("겟인데어");
-        String email = oAuth2User.getAttribute("email");
+        String email = oAuth2UserInfo.getEmail();
         String role = "ROLE_USER";
 
         System.out.println("==================username : " + username);
